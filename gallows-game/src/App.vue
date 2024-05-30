@@ -9,7 +9,7 @@
     <AppPlayingField :word="word" :correct-letters="correctLetters" />
   </div>
 
-  <AppPopup v-if="endGame" />
+  <AppPopup v-if="isWin || isLose" :result="popup" :word='word' />
 
   <!-- Notification -->
   <div class="notification-container show">
@@ -17,7 +17,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import AppHeader from './components/AppHeader.vue'
 import AppGamePerson from './components/AppGamePerson.vue'
 import AppWrongLetters from './components/AppWrongLetters.vue'
@@ -28,14 +28,20 @@ const word = ref('арина')
 const letters = ref<string[]>([])
 const correctLetters = computed(() => letters.value.filter(x => word.value.includes(x)))
 const wrongLetters = computed(() => letters.value.filter(x => !word.value.includes(x)))
-const endGame = computed(() => {
-  console.log(word.value, '111111111')
-  console.log(correctLetters.value, '22222222')
 
-  if (wrongLetters.value.length >= 6) {
-    return 'lose'
-  } if (word.value === correctLetters.value.join('')) {
-    return 'win'
+const isWin = computed(() => [...word.value].every((x) => correctLetters.value.includes(x)))
+const isLose = computed(() => wrongLetters.value.length >= 6)
+const popup:any = ref(null)
+
+watch(correctLetters, () => {
+  if (isWin.value) {
+    popup.value = 'win'
+  }
+})
+
+watch(wrongLetters, () => {
+  if (isLose.value) {
+    popup.value = 'lose'
   }
 })
 
